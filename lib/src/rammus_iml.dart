@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -341,8 +343,15 @@ Future<dynamic> _handler(MethodCall methodCall) {
       traceInfo: methodCall.arguments["traceInfo"],
     ));
   } else if ("onNotification" == methodCall.method) {
-    _onNotificationController.add(OnNotification(methodCall.arguments["title"],
-        methodCall.arguments["summary"], methodCall.arguments["extras"]));
+    if(Platform.isIOS){
+      Map<String, dynamic> extras = json.decode(methodCall.arguments["extras"]);
+      _onNotificationController.add(OnNotification(methodCall.arguments["title"],
+          methodCall.arguments["summary"], extras));
+    }else{
+      _onNotificationController.add(OnNotification(methodCall.arguments["title"],
+          methodCall.arguments["summary"], methodCall.arguments["extras"]));
+    }
+
   } else if ("onNotificationOpened" == methodCall.method) {
     _onNotificationOpenedController.add(OnNotificationOpened(
         methodCall.arguments["title"],
@@ -353,17 +362,35 @@ Future<dynamic> _handler(MethodCall methodCall) {
   } else if ("onNotificationRemoved" == methodCall.method) {
     _onNotificationRemovedController.add(methodCall.arguments);
   } else if ("onNotificationClickedWithNoAction" == methodCall.method) {
-    _onNotificationClickedWithNoActionController.add(
-        OnNotificationClickedWithNoAction(methodCall.arguments["title"],
-            methodCall.arguments["summary"], methodCall.arguments["extras"]));
+    if(Platform.isIOS){
+      Map<String, dynamic> extras = json.decode(methodCall.arguments["extras"]);
+      _onNotificationClickedWithNoActionController.add(
+          OnNotificationClickedWithNoAction(methodCall.arguments["title"],
+              methodCall.arguments["summary"], extras));
+    }else{
+      _onNotificationClickedWithNoActionController.add(
+          OnNotificationClickedWithNoAction(methodCall.arguments["title"],
+              methodCall.arguments["summary"], methodCall.arguments["extras"]));
+    }
   } else if ("onNotificationReceivedInApp" == methodCall.method) {
-    _onNotificationReceivedInAppController.add(OnNotificationReceivedInApp(
-        methodCall.arguments["title"],
-        methodCall.arguments["summary"],
-        methodCall.arguments["extras"],
-        methodCall.arguments["openType"],
-        methodCall.arguments["openActivity"],
-        methodCall.arguments["openUrl"]));
+    if(Platform.isIOS){
+      Map<String, dynamic> extras = json.decode(methodCall.arguments["extras"]);
+      _onNotificationReceivedInAppController.add(OnNotificationReceivedInApp(
+          methodCall.arguments["title"],
+          methodCall.arguments["summary"],
+          extras,
+          methodCall.arguments["openType"],
+          methodCall.arguments["openActivity"],
+          methodCall.arguments["openUrl"]));
+    }else{
+      _onNotificationReceivedInAppController.add(OnNotificationReceivedInApp(
+          methodCall.arguments["title"],
+          methodCall.arguments["summary"],
+          methodCall.arguments["extras"],
+          methodCall.arguments["openType"],
+          methodCall.arguments["openActivity"],
+          methodCall.arguments["openUrl"]));
+    }
   }
 
   return Future.value(true);
